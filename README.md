@@ -1,1 +1,1 @@
-# looking-glass
+Experiment looking at interpreting clusters by training a classifier on the cluster labels. We then use ML interpretation methods to try to find the features which distiguish the clusters from the rest of the points

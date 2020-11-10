@@ -1,0 +1,17 @@
+build
+dist
+*.egg-info
+job.*
+*.log
+*.nfs*
+*.pyc
+.ropeproject
+*.swp
+.tags
+.idea
+.cache
+.ipynb_checkpoints
+.pytest_cache
+.eggs
+__pycache__/
+pytest.xml
