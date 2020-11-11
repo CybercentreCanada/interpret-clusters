@@ -8,7 +8,7 @@ setup(
     author_email='',
     description='Interpretable clustering',
     install_requires=[
-        'numpy', 'pandas', 'scikit-learn', 'shap'
+        'numpy', 'pandas', 'scikit-learn', 'shap', 'interpret'
     ],
     include_package_data=True,
     url='',
