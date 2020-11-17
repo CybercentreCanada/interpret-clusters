@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='looking_glass',
+    name='interpret_clusters',
     version='0.1.0',
-    packages=['looking_glass'],
+    packages=['interpret_clusters'],
     author='',
     author_email='',
     description='Interpretable clustering',

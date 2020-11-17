@@ -1,1 +1,3 @@
-Experiment looking at interpreting clusters by training a classifier on the cluster labels. We then use ML interpretation methods to try to find the features which distiguish the clusters from the rest of the points
+Interpret-Clusters is an experimental repository extending [interpret](https://github.com/interpretml/interpret), used to interpret unsupervised learning models. For each cluster we want to know "what distinguishes this cluster from the others?". We try to answer this question by training a one-vs-all classifier for each cluster and then interpret the classifier.
+
+In many cases, the set of features used to cluster the data will be different from the features used to interpret the cluster. For example, if you first do dimension reduction (using something like UMAP or t-SNE) on a set of features, the embedded dimensions are not interpretable. You may then try to interpret the clusters on the raw features to gain insight into your results.
