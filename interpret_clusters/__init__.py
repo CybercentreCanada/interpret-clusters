@@ -6,6 +6,8 @@ from sklearn.model_selection import train_test_split
 from interpret.glassbox import ExplainableBoostingClassifier
 from tqdm import tqdm
 
+from copy import deepcopy
+
 class ClusterExplainer():
     
     def __init__(self, features, cluster_labels, feature_names=None, clusters_to_analyze=None, 
@@ -36,7 +38,6 @@ class ClusterExplainer():
         include_training_set: bool (optional, False)
             Whether or not to include the training set when calculating feature importances. By default only the test set is used.
         """
-
         self.features = features
         self.cluster_labels = np.array(cluster_labels)
         self.include_training_set = include_training_set
@@ -57,7 +58,7 @@ class ClusterExplainer():
             if classifier == 'ebm':
                 classifier = ExplainableBoostingClassifier(feature_names=self.feature_names)
             
-            cluster_model = ClusterModel(cluster_id, classifier, features, cluster_labels)
+            cluster_model = ClusterModel(cluster_id, deepcopy(classifier), features, cluster_labels)
             self.cluster_models[cluster_id] = cluster_model
     
         self.local_explanations = {}
