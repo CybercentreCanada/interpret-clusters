@@ -13,11 +13,12 @@ from tqdm import tqdm
 class ClusterExplainer():
     
     def __init__(self, features, cluster_labels, feature_names=None, clusters_to_analyze=None, 
-                 classifier='ebm', include_training_set=False, score_threshold=0.8, verbose=False):
+                 classifier='ebm', score_threshold=0.8, verbose=False):
         
-        """Interpret-clusters is a utility that aims to provide cluster interpretations. This is done by using the cluster ids as labels and training supervised learning models to predict the clusters. 
-        The given features do not need to be the same set of features as what was used to calculate the clusters. By calculating the feature importance of the supervised model 
-        we can find the features that are important to distinguishing a particular cluster. 
+        """Interpret-clusters is a utility that aims to provide cluster interpretations. This is done by using the cluster ids as labels 
+        and training supervised learning models to predict the clusters. The given features do not need to be the same set of features 
+        as what was used to calculate the clusters. By calculating the feature importance of the supervised model we can find the features 
+        that are important to distinguishing a particular cluster. 
         
         Parameters
         ----------
@@ -37,12 +38,15 @@ class ClusterExplainer():
         classifier: string or callable (optional, default ebm)
             The classifier to use for predicting cluster labels. It must be a classifier from the interpret package. Built-in options are ["ebm", "logistic_regression"].
 
-        include_training_set: bool (optional, False)
-            Whether or not to include the training set when calculating feature importances. By default only the test set is used.
+        score_threshold: float (optional, default 0.8)
+            Warn if the trained model has a score below this threshold.
+        
+        verbose: bool (optional, default False)
+            Display progress information.
+
         """
         self.features = features
         self.cluster_labels = np.array(cluster_labels)
-        self.include_training_set = include_training_set
         
         if feature_names is not None:
             self.feature_names = np.array(feature_names)
@@ -65,6 +69,7 @@ class ClusterExplainer():
             cluster_model = ClusterModel(cluster_id, deepcopy(classifier), features, cluster_labels, score_threshold=score_threshold, verbose=verbose)
             self.cluster_models[cluster_id] = cluster_model
     
+        self.verbose = verbose
         self.local_explanations = {}
         self.global_explanations = {}
 
@@ -87,7 +92,7 @@ class ClusterExplainer():
 
     def calculate_all_local_explanations(self):
         """Calculate local explanations for all clusters in clusters_to_analyze."""
-        for cluster_label in tqdm(self.clusters_to_analyze):
+        for cluster_label in (tqdm(self.clusters_to_analyze) if self.verbose else self.clusters_to_analyze):
             clf_local = self.cluster_local_explanations(cluster_label)
             self.local_explanations[cluster_label] = clf_local
 
@@ -106,9 +111,9 @@ class ClusterExplainer():
 
     def calculate_all_global_explanations(self):
         """Calculate global explanations for all clusters in clusters_to_analyze."""
-        for cluster_label in tqdm(self.clusters_to_analyze):
+        for cluster_label in (tqdm(self.clusters_to_analyze) if self.verbose else self.clusters_to_analyze):
             clf_global = self.cluster_global_explanations(cluster_label)
-            self.local_explanations[cluster_label] = clf_global
+            self.global_explanations[cluster_label] = clf_global
 
     def get_model_score_for_cluster(self, cluster_label):
         """Get a performance score for the ClusterModel
@@ -138,8 +143,15 @@ class ClusterModel():
         ----------
         label: str or int
             The label of the cluster to analyze.
+        
         classifier: callable
             The classifier to use for predicting cluster labels. It must be a tree based classifier from sklearn.
+        
+        score_threshold: float (optional, default 0.8)
+            Warn if the trained model has a score below this threshold.
+        
+        verbose: bool (optional, default False)
+            Display progress information.
         """
         self.label = label
         self.model = classifier
@@ -169,10 +181,14 @@ class ClusterModel():
             self.model.fit(features[self.train_indices], self.one_vs_all_labels[self.train_indices])
             self.score = self.model.score(features[self.test_indices], self.one_vs_all_labels[self.test_indices])
 
+            if self.verbose:
+                print(f'Finished training model for cluser {self.label}. Score for model is {self.score}')
+
             if self.score < self.score_threshold:
                 warn(f'Model score for cluster {self.label} is {self.score} which is below the threshold of {self.score_threshold}')
 
     def explain_local(self, features):
+        """Calculate explanations for each individual point"""
         is_cluster = self.one_vs_all_labels == 1
         cluster_of_interest_features = features[is_cluster]
         cluster_of_interest_labels = self.one_vs_all_labels[is_cluster]
@@ -184,7 +200,7 @@ class ClusterModel():
         return local_explanations
 
     def explain_global(self):
-
+        """Calculate explanations for cluster as a whole and for each feature overall."""
         if self.verbose:
             print(f'Calculating global explanations for cluster {self.label}')
 
