@@ -6,10 +6,10 @@ setup(
     packages=['interpret_clusters'],
     author='',
     author_email='',
-    description='Interpretable clustering',
+    description='Try to interpret unsupervised learning models by training a series of one-vs-all classifiers.',
     install_requires=[
-        'numpy', 'pandas', 'scikit-learn', 'shap', 'interpret'
+        'numpy', 'pandas', 'scikit-learn', 'interpret'
     ],
     include_package_data=True,
-    url='',
+    url='https://github.com/CybercentreCanada/interpret-clusters',
 )
